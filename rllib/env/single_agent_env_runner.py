@@ -619,7 +619,7 @@ class SingleAgentEnvRunner(EnvRunner, Checkpointable):
         """
         # Make sure, we have built our gym.vector.Env and RLModule properly.
         assert self.env and hasattr(self, "module")
-
+        
     @override(EnvRunner)
     def make_env(self) -> None:
         """Creates a vectorized gymnasium env and stores it in `self.env`.
@@ -655,35 +655,8 @@ class SingleAgentEnvRunner(EnvRunner, Checkpointable):
                 "to your config through `config.environment([env descriptor e.g. "
                 "'CartPole-v1'])`."
             )
-        # Register env for the local context.
-        # Note, `gym.register` has to be called on each worker.
-        elif isinstance(self.config.env, str) and _global_registry.contains(
-            ENV_CREATOR, self.config.env
-        ):
-            entry_point = partial(
-                _global_registry.get(ENV_CREATOR, self.config.env),
-                env_ctx,
-            )
-        else:
-            entry_point = partial(
-                _gym_env_creator,
-                env_descriptor=self.config.env,
-                env_context=env_ctx,
-            )
-        gym.register("rllib-single-agent-env-v0", entry_point=entry_point)
-        vectorize_mode = self.config.gym_env_vectorize_mode
 
-        self.env = DictInfoToList(
-            gym.make_vec(
-                "rllib-single-agent-env-v0",
-                num_envs=self.config.num_envs_per_env_runner,
-                vectorization_mode=(
-                    vectorize_mode
-                    if isinstance(vectorize_mode, gym.envs.registration.VectorizeMode)
-                    else gym.envs.registration.VectorizeMode(vectorize_mode.lower())
-                ),
-            )
-        )
+        self.env = self.config.env(env_ctx)
 
         self.num_envs: int = self.env.num_envs
         assert self.num_envs == self.config.num_envs_per_env_runner
