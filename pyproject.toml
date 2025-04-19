@@ -3,11 +3,15 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rllib-indra-rl-lab"
+name = "ray"
 version = "0.1.0"
 description = "Custom fork of Ray RLlib with Indra-RL-Lab modifications"
 authors = [{ name = "Javi Carrera" }]
-dependencies = []
+dependencies = [
+    "gymnasium==1.0.0",
+    "protobuf==6.30.2",
+    "PyYAML==6.0.2",
+]
 requires-python = ">=3.9"
 
 [tool.ruff]
